@@ -8,7 +8,7 @@ from pathlib import Path
 
 from groq import Groq
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL ="openai/gpt-oss-120b"
 
 _PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "review_prompt.txt"
 _PROMPT_TEMPLATE = _PROMPT_PATH.read_text(encoding="utf-8")
