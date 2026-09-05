@@ -109,12 +109,20 @@ def main() -> None:
         try:
             result = review_code(diff_text, language)
         except Exception as e:  # noqa: BLE001 - surface any API failure per-file
-            sections.append(f"### `{filename}`\n\n⚠️ Review failed: {e}\n")
+            print(
+                f"CodeGuardian review error for {filename}: "
+                f"{type(e).__name__}: {e!r}"
+            )
+            sections.append(
+                f"### `{filename}`\n\n"
+                f"⚠ Review failed: {type(e).__name__}: {e}\n"
+            )
             continue
 
-        if SEVERITY_RANK.get(result["severity"], 0) > SEVERITY_RANK.get(worst_severity, 0):
+        if SEVERITY_RANK.get(result["severity"], 0) > SEVERITY_RANK.get(
+            worst_severity, 0
+        ):
             worst_severity = result["severity"]
-
         badge = {
             "Critical": "🔴 Critical",
             "High": "🟠 High",
