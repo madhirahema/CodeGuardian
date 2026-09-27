@@ -107,7 +107,7 @@ def main() -> None:
         diff_text = patch[:MAX_PATCH_CHARS]
 
         print(f"Reviewing {filename} ({language})...")
-                try:
+        try:
             result = review_code(diff_text, language)
         except Exception as e:  # noqa: BLE001 - surface any API failure per-file
             print(f"--- Full traceback for {filename} ---")
@@ -116,10 +116,9 @@ def main() -> None:
             sections.append(f"### `{filename}`\n\n⚠️ Review failed: {e}\n")
             continue
 
-        if SEVERITY_RANK.get(result["severity"], 0) > SEVERITY_RANK.get(
-            worst_severity, 0
-        ):
+        if SEVERITY_RANK.get(result["severity"], 0) > SEVERITY_RANK.get(worst_severity, 0):
             worst_severity = result["severity"]
+
         badge = {
             "Critical": "🔴 Critical",
             "High": "🟠 High",
