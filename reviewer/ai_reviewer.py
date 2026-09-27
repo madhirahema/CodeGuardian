@@ -41,7 +41,7 @@ _SEVERITY_LINE_RE = re.compile(
 def _get_client() -> Groq:
     """Create a Groq client using the configured API key."""
 
-    api_key = os.environ.get("GROQ_API_KEY")
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
 
     if not api_key:
         raise RuntimeError(
