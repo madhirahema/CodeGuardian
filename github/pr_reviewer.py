@@ -107,12 +107,17 @@ def main() -> None:
         diff_text = patch[:MAX_PATCH_CHARS]
 
         print(f"Reviewing {filename} ({language})...")
-        try:
+                try:
             result = review_code(diff_text, language)
         except Exception as e:  # noqa: BLE001 - surface any API failure per-file
-            print(f"--- Full traceback for {filename} ---")
-            traceback.print_exc()
-            print("--- end traceback ---")
+            print(f"--- Full traceback for {filename} ---", flush=True)
+            traceback.print_exc(file=sys.stdout)
+            cause = getattr(e, "__cause__", None)
+            if cause is not None:
+                print(f"UNDERLYING CAUSE: {type(cause).__name__}: {cause}", flush=True)
+            else:
+                print("UNDERLYING CAUSE: none captured on the exception object", flush=True)
+            print("--- end traceback ---", flush=True)
             sections.append(f"### `{filename}`\n\n⚠️ Review failed: {e}\n")
             continue
 
