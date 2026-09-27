@@ -20,6 +20,7 @@ two secrets):
 
 import os
 import sys
+import traceback
 
 import requests
 
@@ -106,17 +107,13 @@ def main() -> None:
         diff_text = patch[:MAX_PATCH_CHARS]
 
         print(f"Reviewing {filename} ({language})...")
-        try:
+                try:
             result = review_code(diff_text, language)
         except Exception as e:  # noqa: BLE001 - surface any API failure per-file
-            print(
-                f"CodeGuardian review error for {filename}: "
-                f"{type(e).__name__}: {e!r}"
-            )
-            sections.append(
-                f"### `{filename}`\n\n"
-                f"⚠ Review failed: {type(e).__name__}: {e}\n"
-            )
+            print(f"--- Full traceback for {filename} ---")
+            traceback.print_exc()
+            print("--- end traceback ---")
+            sections.append(f"### `{filename}`\n\n⚠️ Review failed: {e}\n")
             continue
 
         if SEVERITY_RANK.get(result["severity"], 0) > SEVERITY_RANK.get(

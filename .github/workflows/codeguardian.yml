@@ -30,6 +30,61 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
+	name: CodeGuardian PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: CodeGuardian Security Review
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+	      - name: Test connectivity to Groq
+        run: |
+          echo "Testing DNS + HTTPS reachability to api.groq.com..."
+          curl -v --max-time 15 https://api.groq.com/openai/v1/models -H "Authorization: Bearer ${{ secrets.GROQ_API_KEY }}" || echo "CURL_FAILED_EXIT_CODE=$?"
+
+      - name: Validate CodeGuardian configuration
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ]; then
+            echo "::error::GROQ_API_KEY is not configured."
+            exit 1
+          fi
+
+          echo "GROQ_API_KEY is configured."
+
+      - name: Run CodeGuardian
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          python github/pr_reviewer.py
       - name: Validate CodeGuardian configuration
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
